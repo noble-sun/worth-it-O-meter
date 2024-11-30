@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-
+    //To add more dependencies, first configure the dependency on libs.versions.toml
     implementation(libs.play.services.wearable)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.tiles)
     implementation(libs.tiles.material)
     implementation(libs.tiles.tooling.preview)
+    implementation(libs.horologist.compose.layout)
+    implementation(libs.horologist.compose.material)
     implementation(libs.horologist.compose.tools)
     implementation(libs.horologist.tiles)
     implementation(libs.watchface.complications.data.source.ktx)

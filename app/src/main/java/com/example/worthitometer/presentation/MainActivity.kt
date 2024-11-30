@@ -25,6 +25,16 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.worthitometer.R
 import com.example.worthitometer.presentation.theme.WorthItOMeterTheme
+import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.layout.AppScaffold
+import com.google.android.horologist.compose.layout.ScalingLazyColumn
+import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
+import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults.ItemType
+import com.google.android.horologist.compose.layout.ScreenScaffold
+import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
+import com.google.android.horologist.compose.material.Chip
+import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
+import com.google.android.horologist.compose.material.ResponsiveListHeader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,17 +50,42 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun WearApp(greetingName: String) {
     WorthItOMeterTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            TimeText()
-            Greeting(greetingName = greetingName)
+        // This adds a structured layer to arrange screen with top level components like time,
+        // scroll positions and page indicator.
+        AppScaffold{
+            // This helps with the resizing on ScalingLazyColumn by informing the first and last
+            // type of the items on the column
+            val listState = rememberResponsiveColumnState(
+                contentPadding = ScalingLazyColumnDefaults.padding(
+                    first = ItemType.Text,
+                    last = ItemType.Chip,
+                ),
+            )
+
+            // I think this is what actually adds the scroll position on the screen
+            ScreenScaffold(
+                scrollState = listState
+            ) {
+                // This properly resize and add layout modifications to components when scrolling for
+                // rounded screens
+                ScalingLazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    columnState = listState,
+                ){
+                    item {
+                        ResponsiveListHeader(contentPadding = firstItemPadding()) {
+                            Text(text = "Products")
+                        }
+                    }
+                    items(10) {
+                        Chip("Item $it", onClick = {})
+                    }
+                }
+            }
         }
     }
 }
