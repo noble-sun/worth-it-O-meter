@@ -13,12 +13,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
@@ -57,49 +62,51 @@ fun WearApp(greetingName: String) {
         // This adds a structured layer to arrange screen with top level components like time,
         // scroll positions and page indicator.
         AppScaffold{
-            // This helps with the resizing on ScalingLazyColumn by informing the first and last
-            // type of the items on the column
-            val listState = rememberResponsiveColumnState(
-                contentPadding = ScalingLazyColumnDefaults.padding(
-                    first = ItemType.Text,
-                    last = ItemType.Chip,
-                ),
-            )
-
-            // I think this is what actually adds the scroll position on the screen
-            ScreenScaffold(
-                scrollState = listState
-            ) {
-                // This properly resize and add layout modifications to components when scrolling for
-                // rounded screens
-                ScalingLazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    columnState = listState,
-                ){
-                    item {
-                        ResponsiveListHeader(contentPadding = firstItemPadding()) {
-                            Text(text = "Products")
-                        }
-                    }
-                    items(10) {
-                        Chip("Item $it", onClick = {})
-                    }
-                }
-            }
+            ListScreen()
         }
     }
 }
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
+fun ListScreen() {
+    // This helps with the resizing on ScalingLazyColumn by informing the first and last
+    // type of the items on the column
+    val listState = rememberResponsiveColumnState(
+        contentPadding = ScalingLazyColumnDefaults.padding(
+            first = ItemType.Text,
+            last = ItemType.Chip,
+        ),
     )
-}
 
+    // I think this is what actually adds the scroll position on the screen
+    ScreenScaffold(
+        scrollState = listState
+    ) {
+        // This properly resize and add layout modifications to components when scrolling for
+        // rounded screens
+        ScalingLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            columnState = listState,
+        ){
+            item {
+                ResponsiveListHeader(contentPadding = firstItemPadding()) {
+                    Text(text = "Products")
+                }
+            }
+            items(10) {
+                Chip(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {},
+                    label = { Text(text = "Product Name", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    secondaryLabel = {
+                        Text(text = "R$ $it,00", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                )
+            }
+        }
+    }
+}
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
