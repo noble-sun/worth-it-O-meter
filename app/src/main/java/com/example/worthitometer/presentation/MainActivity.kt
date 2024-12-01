@@ -10,20 +10,47 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.ButtonDefaults
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
@@ -62,7 +89,91 @@ fun WearApp(greetingName: String) {
         // This adds a structured layer to arrange screen with top level components like time,
         // scroll positions and page indicator.
         AppScaffold{
-            ListScreen()
+            CreateScreen()
+        }
+    }
+}
+@OptIn(ExperimentalHorologistApi::class)
+@Composable
+fun CreateScreen() {
+    var textInput by remember { mutableStateOf("") }
+    var numInput by remember { mutableStateOf("") }
+
+    // This helps with the resizing on ScalingLazyColumn by informing the first and last
+    // type of the items on the column
+    val listState = rememberResponsiveColumnState(
+        contentPadding = ScalingLazyColumnDefaults.padding(
+            first = ItemType.Text,
+            last = ItemType.Chip,
+        ),
+    )
+
+    // I think this is what actually adds the scroll position on the screen
+    ScreenScaffold(
+        scrollState = listState
+    ) {
+        // This properly resize and add layout modifications to components when scrolling for
+        // rounded screens
+        ScalingLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            columnState = listState,
+        ) {
+            item {
+                TextField(
+                    value = textInput,
+                    onValueChange = { textInput = it },
+                    placeholder = { Text("Produce Name") },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(50)),
+                    textStyle = TextStyle(fontSize = 14.sp),
+                    shape = RoundedCornerShape(50)
+                )
+            }
+            item {
+                TextField(
+                    value = numInput,
+                    onValueChange = { numInput = it },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    placeholder = { Text("0,00") },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(50)),
+                    textStyle = TextStyle(fontSize = 14.sp),
+                    shape = RoundedCornerShape(50)
+                )
+
+            }
+            item {
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = { "does nothing for now" },
+                        modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel"
+                        )
+                    }
+                    Spacer(Modifier.size(6.dp))
+                    Button(
+                        onClick = { "does nothing for now" },
+                        modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Create"
+                        )
+                    }
+                }
+            }
         }
     }
 }
