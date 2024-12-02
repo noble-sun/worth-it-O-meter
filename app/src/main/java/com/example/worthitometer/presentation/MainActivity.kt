@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
@@ -58,6 +59,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.worthitometer.R
 import com.example.worthitometer.presentation.theme.WorthItOMeterTheme
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.composables.DatePicker
 import com.google.android.horologist.compose.layout.AppScaffold
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
@@ -67,6 +69,7 @@ import com.google.android.horologist.compose.layout.rememberResponsiveColumnStat
 import com.google.android.horologist.compose.material.Chip
 import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
 import com.google.android.horologist.compose.material.ResponsiveListHeader
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,72 +111,94 @@ fun CreateScreen() {
         ),
     )
 
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var isDatePickerVisible by remember { mutableStateOf(false) }
+
     // I think this is what actually adds the scroll position on the screen
     ScreenScaffold(
         scrollState = listState
     ) {
-        // This properly resize and add layout modifications to components when scrolling for
-        // rounded screens
-        ScalingLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            columnState = listState,
-        ) {
-            item {
-                TextField(
-                    value = textInput,
-                    onValueChange = { textInput = it },
-                    placeholder = { Text("Produce Name") },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(50)),
-                    textStyle = TextStyle(fontSize = 14.sp),
-                    shape = RoundedCornerShape(50)
-                )
-            }
-            item {
-                TextField(
-                    value = numInput,
-                    onValueChange = { numInput = it },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    placeholder = { Text("0,00") },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(50)),
-                    textStyle = TextStyle(fontSize = 14.sp),
-                    shape = RoundedCornerShape(50)
-                )
+        if (!isDatePickerVisible) {
+            // This properly resize and add layout modifications to components when scrolling for
+            // rounded screens
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                columnState = listState,
+            ) {
+                item {
+                    TextField(
+                        value = textInput,
+                        onValueChange = { textInput = it },
+                        placeholder = { Text("Produce Name") },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(50)),
+                        textStyle = TextStyle(fontSize = 14.sp),
+                        shape = RoundedCornerShape(50)
+                    )
+                }
+                item {
+                    TextField(
+                        value = numInput,
+                        onValueChange = { numInput = it },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        placeholder = { Text("0,00") },
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(50)),
+                        textStyle = TextStyle(fontSize = 14.sp),
+                        shape = RoundedCornerShape(50)
+                    )
 
-            }
-            item {
-                Row(
-                    modifier = Modifier,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = { "does nothing for now" },
-                        modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+                }
+                item {
+                    Chip(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { isDatePickerVisible = true },
+                        label = { Text("$selectedDate") }
+                    )
+                }
+                item {
+                    Row(
+                        modifier = Modifier,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel"
-                        )
-                    }
-                    Spacer(Modifier.size(6.dp))
-                    Button(
-                        onClick = { "does nothing for now" },
-                        modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Create"
-                        )
+                        Button(
+                            onClick = { "does nothing for now" },
+                            modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancel"
+                            )
+                        }
+                        Spacer(Modifier.size(6.dp))
+                        Button(
+                            onClick = { "does nothing for now" },
+                            modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Create"
+                            )
+                        }
                     }
                 }
             }
+        } else {
+            DatePicker(
+                date = selectedDate,
+                onDateConfirm = { date ->
+                    selectedDate = date
+                    println("Selected date updated: $selectedDate")
+                    isDatePickerVisible = false
+                },
+                toDate = LocalDate.now()
+            )
         }
     }
 }
