@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "com.worthItOMeter";
+option java_multiple_files = true;
+
+message Item {
+    string product = 1;
+    float product_price = 2;
+    string bought_date = 3;
+    float per_day_value = 4;
+}
+
+message ItemList {
+    repeated Item items = 1;
+}
