@@ -5,6 +5,7 @@
 
 package com.example.worthitometer.presentation
 
+import ItemRepository
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -40,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
@@ -58,6 +62,7 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.worthitometer.R
 import com.example.worthitometer.presentation.theme.WorthItOMeterTheme
+import com.example.worthitometer.viewmodel.ItemViewModel
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.composables.DatePicker
 import com.google.android.horologist.compose.layout.AppScaffold
@@ -69,6 +74,7 @@ import com.google.android.horologist.compose.layout.rememberResponsiveColumnStat
 import com.google.android.horologist.compose.material.Chip
 import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
 import com.google.android.horologist.compose.material.ResponsiveListHeader
+import itemListDataStore
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -89,10 +95,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WearApp(greetingName: String) {
     WorthItOMeterTheme {
+
         // This adds a structured layer to arrange screen with top level components like time,
         // scroll positions and page indicator.
         AppScaffold{
-            CreateScreen()
+            val context = LocalContext.current
+            val repository = ItemRepository(context.itemListDataStore)
+            val viewModel = ItemViewModel(repository)
+            ListScreen(viewModel)
         }
     }
 }
@@ -205,7 +215,11 @@ fun CreateScreen() {
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun ListScreen() {
+fun ListScreen(viewModel: ItemViewModel) {
+
+    val items by viewModel.items.collectAsState()
+    val itemCount = items.size
+
     // This helps with the resizing on ScalingLazyColumn by informing the first and last
     // type of the items on the column
     val listState = rememberResponsiveColumnState(
@@ -226,17 +240,34 @@ fun ListScreen() {
             columnState = listState,
         ){
             item {
+                Button(onClick = {
+                    viewModel.addItem("Test Product", 99.99f, "2024-12-12", 5.0f)
+                }) {
+                    Text("Add Item")
+                }
+            }
+            item {
                 ResponsiveListHeader(contentPadding = firstItemPadding()) {
                     Text(text = "Products")
                 }
             }
-            items(10) {
+            itemsIndexed(items) { index, item ->
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {},
-                    label = { Text(text = "Product Name", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    label = {
+                        Text(
+                            text = "${index + 1}. ${item.product}",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
                     secondaryLabel = {
-                        Text(text = "R$ $it,00", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = "R$ ${item.productPrice}",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 )
             }
