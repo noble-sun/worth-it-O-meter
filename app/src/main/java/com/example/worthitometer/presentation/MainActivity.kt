@@ -60,6 +60,10 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import androidx.navigation.NavController
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.worthitometer.R
 import com.example.worthitometer.presentation.theme.WorthItOMeterTheme
@@ -107,14 +111,25 @@ fun WearApp(greetingName: String) {
             val context = LocalContext.current
             val repository = ItemRepository(context.itemListDataStore)
             val viewModel = ItemViewModel(repository)
-            
-            CreateScreen(viewModel)
+
+            val navController = rememberSwipeDismissableNavController()
+            SwipeDismissableNavHost(
+                navController = navController,
+                startDestination = "list"
+            ) {
+                composable("list") {
+                    ListScreen(viewModel, navController)
+                }
+                composable("create") {
+                    CreateScreen(viewModel, navController)
+                }
+            }
         }
     }
 }
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun CreateScreen(viewModel: ItemViewModel) {
+fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
 
     // This helps with the resizing on ScalingLazyColumn by informing the first and last
     // type of the items on the column
@@ -209,7 +224,7 @@ fun CreateScreen(viewModel: ItemViewModel) {
                                 )
                                 Log.d("CreateScreenButton", "Insertion in data_store finished")
 
-
+                                navController.navigate("list")
                             },
                             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
                         ) {
@@ -252,7 +267,7 @@ fun calculatePerDayValue(date: LocalDate, productValue: Float): Float {
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun ListScreen(viewModel: ItemViewModel) {
+fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
 
     val items by viewModel.items.collectAsState()
     val itemCount = items.size
@@ -278,7 +293,7 @@ fun ListScreen(viewModel: ItemViewModel) {
         ){
             item {
                 Button(onClick = {
-                    viewModel.addItem("Test Product", 99.99f, "2024-12-12", 5.0f)
+                    navController.navigate("create")
                 }) {
                     Text("Add Item")
                 }
