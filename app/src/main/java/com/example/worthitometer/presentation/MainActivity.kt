@@ -7,6 +7,7 @@ package com.example.worthitometer.presentation
 
 import ItemRepository
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -75,7 +76,11 @@ import com.google.android.horologist.compose.material.Chip
 import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
 import com.google.android.horologist.compose.material.ResponsiveListHeader
 import itemListDataStore
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,15 +107,14 @@ fun WearApp(greetingName: String) {
             val context = LocalContext.current
             val repository = ItemRepository(context.itemListDataStore)
             val viewModel = ItemViewModel(repository)
-            ListScreen(viewModel)
+            
+            CreateScreen(viewModel)
         }
     }
 }
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun CreateScreen() {
-    var textInput by remember { mutableStateOf("") }
-    var numInput by remember { mutableStateOf("") }
+fun CreateScreen(viewModel: ItemViewModel) {
 
     // This helps with the resizing on ScalingLazyColumn by informing the first and last
     // type of the items on the column
@@ -120,7 +124,11 @@ fun CreateScreen() {
             last = ItemType.Chip,
         ),
     )
+    val items by viewModel.items.collectAsState()
 
+
+    var productName by remember { mutableStateOf("") }
+    var productValue by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isDatePickerVisible by remember { mutableStateOf(false) }
 
@@ -137,8 +145,8 @@ fun CreateScreen() {
             ) {
                 item {
                     TextField(
-                        value = textInput,
-                        onValueChange = { textInput = it },
+                        value = productName,
+                        onValueChange = { productName = it },
                         placeholder = { Text("Produce Name") },
                         modifier = Modifier
                             .wrapContentWidth()
@@ -150,10 +158,10 @@ fun CreateScreen() {
                 }
                 item {
                     TextField(
-                        value = numInput,
-                        onValueChange = { numInput = it },
+                        value = productValue,
+                        onValueChange = { productValue = it },
                         keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
+                            keyboardType = KeyboardType.Decimal
                         ),
                         placeholder = { Text("0,00") },
                         modifier = Modifier
@@ -187,8 +195,22 @@ fun CreateScreen() {
                             )
                         }
                         Spacer(Modifier.size(6.dp))
+
+                        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        val formattedDate = selectedDate.format(dateFormatter)
                         Button(
-                            onClick = { "does nothing for now" },
+                            onClick = {
+                                Log.d("CreateScreenButton", "inserting in data_store")
+                                viewModel.addItem(
+                                    productName,
+                                    productValue.toFloat(),
+                                    formattedDate,
+                                    calculatePerDayValue(selectedDate, productValue.toFloat())
+                                )
+                                Log.d("CreateScreenButton", "Insertion in data_store finished")
+
+
+                            },
                             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
                         ) {
                             Icon(
@@ -211,6 +233,21 @@ fun CreateScreen() {
             )
         }
     }
+}
+
+fun calculatePerDayValue(date: LocalDate, productValue: Float): Float {
+    val daysSinceBought = ChronoUnit.DAYS.between(date, LocalDate.now())
+    Log.d("calculatePerDayValue", "since bought: $daysSinceBought")
+
+    val valuePerDay = productValue / daysSinceBought
+
+    val df = DecimalFormat("#.##")
+    df.roundingMode = RoundingMode.DOWN
+    val roundedValue = df.format(valuePerDay)
+
+    Log.d("calculatePerDayValue", "value per day: $valuePerDay")
+
+    return roundedValue.toFloat()
 }
 
 @OptIn(ExperimentalHorologistApi::class)
@@ -264,7 +301,7 @@ fun ListScreen(viewModel: ItemViewModel) {
                     },
                     secondaryLabel = {
                         Text(
-                            text = "R$ ${item.productPrice}",
+                            text = "R$ ${item.perDayValue}",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
