@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -141,14 +142,10 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
         ),
     )
 
-    val items by viewModel.items.collectAsState()
-
-
     var productName by remember { mutableStateOf("") }
     var productValue by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isDatePickerVisible by remember { mutableStateOf(false) }
-
 
     if (id != null) {
         val itemFlow = viewModel.getItem(id.toInt())
@@ -214,12 +211,16 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Button(
-                            onClick = { "does nothing for now" },
+                            onClick = {
+                                viewModel.deleteItem(id!!.toInt())
+
+                                navController.navigate("list")
+                            },
                             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Cancel"
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete"
                             )
                         }
                         Spacer(Modifier.size(6.dp))
