@@ -4,6 +4,7 @@ import ItemRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worthItOMeter.Item
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -16,6 +17,9 @@ class ItemViewModel(private val repository: ItemRepository) : ViewModel() {
         .map{ it.itemsList}
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    fun getItem(index: Int): Flow<Item?> {
+        return repository.getItem(index)
+    }
     fun addItem(product: String, productPrice: Float, boughtDate: String, perDayValue: Float) {
         val newItem = Item.newBuilder()
             .setProduct(product)

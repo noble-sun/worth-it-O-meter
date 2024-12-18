@@ -79,6 +79,7 @@ import com.google.android.horologist.compose.layout.rememberResponsiveColumnStat
 import com.google.android.horologist.compose.material.Chip
 import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
 import com.google.android.horologist.compose.material.ResponsiveListHeader
+import com.worthItOMeter.Item
 import itemListDataStore
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -120,8 +121,8 @@ fun WearApp(greetingName: String) {
                 composable("list") {
                     ListScreen(viewModel, navController)
                 }
-                composable("create") {
-                    CreateScreen(viewModel, navController)
+                composable("create_or_update?id={id}") {
+                    CreateScreen(id = it.arguments?.getString("id"), viewModel, navController)
                 }
             }
         }
@@ -129,7 +130,7 @@ fun WearApp(greetingName: String) {
 }
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
+fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavController) {
 
     // This helps with the resizing on ScalingLazyColumn by informing the first and last
     // type of the items on the column
@@ -139,6 +140,7 @@ fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
             last = ItemType.Chip,
         ),
     )
+
     val items by viewModel.items.collectAsState()
 
 
@@ -146,6 +148,17 @@ fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
     var productValue by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isDatePickerVisible by remember { mutableStateOf(false) }
+
+
+    if (id != null) {
+        val itemFlow = viewModel.getItem(id.toInt())
+        val item by itemFlow.collectAsState(initial = null)
+        if (item != null) {
+            productName = item?.product.toString()
+            productValue = item?.productPrice.toString()
+            selectedDate = LocalDate.parse(item?.boughtDate)
+        }
+    }
 
     // I think this is what actually adds the scroll position on the screen
     ScreenScaffold(
@@ -215,6 +228,24 @@ fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
                         val formattedDate = selectedDate.format(dateFormatter)
                         Button(
                             onClick = {
+                                if (id != null) {
+                                    Log.d("CreateScreenButton", "updating item $id in data_store")
+
+                                    val updatedItem = (
+                                        Item.newBuilder()
+                                            .setProduct(productName)
+                                            .setProductPrice(productValue.toFloat())
+                                            .setBoughtDate(formattedDate)
+                                            .setPerDayValue(
+                                                calculatePerDayValue(selectedDate, productValue.toFloat())
+                                            )
+                                            .build()
+                                    )
+                                    viewModel.editItem(id.toInt(), updatedItem)
+                                    Log.d("CreateScreenButton", "updated item $id in data_store complete")
+
+                                } else {
+
                                 Log.d("CreateScreenButton", "inserting in data_store")
                                 viewModel.addItem(
                                     productName,
@@ -223,6 +254,8 @@ fun CreateScreen(viewModel: ItemViewModel, navController: NavController) {
                                     calculatePerDayValue(selectedDate, productValue.toFloat())
                                 )
                                 Log.d("CreateScreenButton", "Insertion in data_store finished")
+
+                                }
 
                                 navController.navigate("list")
                             },
@@ -293,7 +326,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
         ){
             item {
                 Button(onClick = {
-                    navController.navigate("create")
+                    navController.navigate("create_or_update")
                 }) {
                     Text("Add Item")
                 }
@@ -306,7 +339,9 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
             itemsIndexed(items) { index, item ->
                 Chip(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = {},
+                    onClick = {
+                        navController.navigate("create_or_update?id=${index}")
+                    },
                     label = {
                         Text(
                             text = "${index + 1}. ${item.product}",

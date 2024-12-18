@@ -3,6 +3,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.worthItOMeter.Item
 import com.worthItOMeter.ItemList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 val Context.itemListDataStore: DataStore<ItemList> by dataStore(
     fileName = "item_list.pb",
@@ -13,6 +15,16 @@ class ItemRepository(private val dataStore: DataStore<ItemList>) {
 
     val itemsFlow = dataStore.data
 
+    fun getItem(index: Int): Flow<Item?> {
+        return dataStore.data.map { itemList ->
+            val items = itemList.itemsList
+            if (index in items.indices) {
+                items[index]
+            } else {
+                null
+            }
+        }
+    }
     suspend fun addItem(newItem: Item) {
         dataStore.updateData { currentList ->
             currentList.toBuilder()
