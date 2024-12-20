@@ -33,8 +33,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ChipColors
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +71,7 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.navigation.NavController
+import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.worthitometer.R
 import com.example.worthitometer.presentation.theme.WorthItOMeterTheme
@@ -166,32 +172,70 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                 columnState = listState,
             ) {
                 item {
+                    ResponsiveListHeader(contentPadding = firstItemPadding()) {
+                        Text(text = "Product")
+                    }
+                }
+                item {
                     TextField(
+                        label = { Text(
+                            "Name",
+                            style = TextStyle(
+                                fontSize = if (productName.isNotEmpty()) 10.sp else 14.sp,
+                                color = Color(red = 50, green = 47, blue = 53)
+                            ),
+                        )
+                        },
                         value = productName,
                         onValueChange = { productName = it },
-                        placeholder = { Text("Produce Name") },
                         modifier = Modifier
                             .wrapContentWidth()
                             .height(48.dp)
                             .clip(RoundedCornerShape(50)),
-                        textStyle = TextStyle(fontSize = 14.sp),
-                        shape = RoundedCornerShape(50)
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        shape = RoundedCornerShape(50),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color(red = 50, green = 47, blue = 53),
+                            unfocusedTextColor =  Color(red = 50, green = 47, blue = 53),
+                            unfocusedContainerColor = MaterialTheme.colors.primary,
+                            focusedContainerColor = MaterialTheme.colors.primary
+                        )
                     )
                 }
                 item {
                     TextField(
+                        label = { Text(
+                            "Price",
+                            style = TextStyle(
+                                    fontSize = if (productValue.isNotEmpty()) 10.sp else 14.sp,
+                                    color = Color(red = 50, green = 47, blue = 53)
+                                ),
+                            )
+                        },
                         value = productValue,
                         onValueChange = { productValue = it },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Decimal
                         ),
-                        placeholder = { Text("0,00") },
                         modifier = Modifier
                             .wrapContentWidth()
                             .height(48.dp)
-                            .clip(RoundedCornerShape(50)),
-                        textStyle = TextStyle(fontSize = 14.sp),
-                        shape = RoundedCornerShape(50)
+                            .clip(RoundedCornerShape(50))
+                            .padding(top = 0.dp),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        shape = RoundedCornerShape(50),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color(red = 50, green = 47, blue = 53),
+                            unfocusedTextColor =  Color(red = 50, green = 47, blue = 53),
+                            unfocusedContainerColor = MaterialTheme.colors.primary,
+                            focusedContainerColor = MaterialTheme.colors.primary
+                        )
                     )
 
                 }
@@ -212,7 +256,7 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                                 if (id != null) {
                                     viewModel.deleteItem(id!!.toInt())
                                 }
-                                
+
                                 navController.navigate("list")
                             },
                             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
@@ -336,8 +380,8 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
                     },
                     label = {
                         Text(
-                            text = "${index + 1}. ${item.product}",
-                            maxLines = 1,
+                            text = item.product,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
                     },
