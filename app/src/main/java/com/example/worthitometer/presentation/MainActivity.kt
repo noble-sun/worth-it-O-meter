@@ -209,8 +209,10 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                     ) {
                         Button(
                             onClick = {
-                                viewModel.deleteItem(id!!.toInt())
-
+                                if (id != null) {
+                                    viewModel.deleteItem(id!!.toInt())
+                                }
+                                
                                 navController.navigate("list")
                             },
                             modifier = Modifier.size(ButtonDefaults.SmallButtonSize)
