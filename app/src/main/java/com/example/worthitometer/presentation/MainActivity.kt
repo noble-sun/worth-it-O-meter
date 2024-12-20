@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -88,6 +89,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -135,12 +137,7 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
 
     // This helps with the resizing on ScalingLazyColumn by informing the first and last
     // type of the items on the column
-    val listState = rememberResponsiveColumnState(
-        contentPadding = ScalingLazyColumnDefaults.padding(
-            first = ItemType.Text,
-            last = ItemType.Chip,
-        ),
-    )
+    val listState = rememberResponsiveColumnState()
 
     var productName by remember { mutableStateOf("") }
     var productValue by remember { mutableStateOf("") }
@@ -310,8 +307,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
     // type of the items on the column
     val listState = rememberResponsiveColumnState(
         contentPadding = ScalingLazyColumnDefaults.padding(
-            first = ItemType.Text,
-            last = ItemType.Chip,
+            first = ItemType.Chip
         ),
     )
 
@@ -325,13 +321,6 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
             modifier = Modifier.fillMaxSize(),
             columnState = listState,
         ){
-            item {
-                Button(onClick = {
-                    navController.navigate("create_or_update")
-                }) {
-                    Text("Add Item")
-                }
-            }
             item {
                 ResponsiveListHeader(contentPadding = firstItemPadding()) {
                     Text(text = "Products")
@@ -358,6 +347,18 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
                         )
                     }
                 )
+            }
+            item {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                    navController.navigate("create_or_update")
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add New"
+                    )
+                }
             }
         }
     }
