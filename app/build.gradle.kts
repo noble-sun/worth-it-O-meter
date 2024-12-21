@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.horologist.tiles)
     implementation(libs.watchface.complications.data.source.ktx)
     implementation(libs.material3.android)
+    implementation(libs.material.icons.extended)
     implementation(libs.datastore)
     implementation(libs.protobuf)
     androidTestImplementation(platform(libs.compose.bom))

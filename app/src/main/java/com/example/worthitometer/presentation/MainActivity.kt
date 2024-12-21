@@ -32,7 +32,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextField
@@ -202,10 +205,18 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                             unfocusedTextColor =  Color(red = 50, green = 47, blue = 53),
                             unfocusedContainerColor = MaterialTheme.colors.primary,
                             focusedContainerColor = MaterialTheme.colors.primary
-                        )
+                        ),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.ShoppingCart,
+                                contentDescription = "Product",
+                                tint = Color(red = 50, green = 47, blue = 53)
+                            )
+                        }
                     )
                 }
                 item {
+                    Log.d("TextFieldPrice", "productValue: $productValue")
                     TextField(
                         label = { Text(
                             "Price",
@@ -235,7 +246,14 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                             unfocusedTextColor =  Color(red = 50, green = 47, blue = 53),
                             unfocusedContainerColor = MaterialTheme.colors.primary,
                             focusedContainerColor = MaterialTheme.colors.primary
-                        )
+                        ),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Paid,
+                                contentDescription = "Price",
+                                tint = Color(red = 50, green = 47, blue = 53)
+                            )
+                        }
                     )
 
                 }
@@ -243,7 +261,13 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                     Chip(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { isDatePickerVisible = true },
-                        label = { Text("$selectedDate") }
+                        label = { Text("$selectedDate") },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.DateRange,
+                                contentDescription = "Delete"
+                            )
+                        }
                     )
                 }
                 item {
@@ -273,8 +297,6 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                         Button(
                             onClick = {
                                 if (id != null) {
-                                    Log.d("CreateScreenButton", "updating item $id in data_store")
-
                                     val updatedItem = (
                                         Item.newBuilder()
                                             .setProduct(productName)
@@ -286,10 +308,7 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                                             .build()
                                     )
                                     viewModel.editItem(id.toInt(), updatedItem)
-                                    Log.d("CreateScreenButton", "updated item $id in data_store complete")
-
-                                } else {
-
+                                } else if (productName.isNotEmpty() && productValue.isNotEmpty()){
                                 Log.d("CreateScreenButton", "inserting in data_store")
                                 viewModel.addItem(
                                     productName,
@@ -298,7 +317,6 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
                                     calculatePerDayValue(selectedDate, productValue.toFloat())
                                 )
                                 Log.d("CreateScreenButton", "Insertion in data_store finished")
-
                                 }
 
                                 navController.navigate("list")
