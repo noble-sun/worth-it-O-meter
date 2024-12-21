@@ -98,7 +98,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -108,8 +107,36 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
+            if (shouldUpdateItems) {
+                UpdatePerDayValue()
+            }
             WearApp("Android")
         }
+    }
+
+    private var shouldUpdateItems by mutableStateOf(false)
+    override fun onResume() {
+        super.onResume()
+
+        shouldUpdateItems = true
+    }
+}
+
+@Composable
+fun UpdatePerDayValue() {
+    val context = LocalContext.current
+    val repository = ItemRepository(context.itemListDataStore)
+    val viewModel = ItemViewModel(repository)
+
+    val items = viewModel.items.collectAsState()
+
+    viewModel.updateItems {item, index ->
+        item.toBuilder()
+            .setPerDayValue(calculatePerDayValue(
+                LocalDate.parse(item.boughtDate),
+                item.productPrice)
+            )
+            .build()
     }
 }
 
@@ -117,7 +144,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WearApp(greetingName: String) {
     WorthItOMeterTheme {
-
         // This adds a structured layer to arrange screen with top level components like time,
         // scroll positions and page indicator.
         AppScaffold{

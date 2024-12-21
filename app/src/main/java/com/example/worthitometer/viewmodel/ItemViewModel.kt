@@ -17,6 +17,12 @@ class ItemViewModel(private val repository: ItemRepository) : ViewModel() {
         .map{ it.itemsList}
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    fun updateItems(transform: (Item, Int) -> Item) {
+        viewModelScope.launch {
+            repository.updateAllItems(transform)
+        }
+    }
+
     fun getItem(index: Int): Flow<Item?> {
         return repository.getItem(index)
     }

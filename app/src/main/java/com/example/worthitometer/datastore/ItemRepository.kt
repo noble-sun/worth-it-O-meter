@@ -15,6 +15,18 @@ class ItemRepository(private val dataStore: DataStore<ItemList>) {
 
     val itemsFlow = dataStore.data
 
+    suspend fun updateAllItems(transform: (Item, Int) -> Item) {
+        dataStore.updateData { currentList ->
+            currentList.toBuilder()
+                .clearItems()
+                .addAllItems(
+                    currentList.itemsList.mapIndexed { index, item ->
+                        transform(item, index)
+                    }
+                ).build()
+        }
+    }
+
     fun getItem(index: Int): Flow<Item?> {
         return dataStore.data.map { itemList ->
             val items = itemList.itemsList
