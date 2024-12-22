@@ -94,9 +94,11 @@ import com.worthItOMeter.Item
 import itemListDataStore
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -400,6 +402,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
             first = ItemType.Chip
         ),
     )
+    val formatter = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
     // I think this is what actually adds the scroll position on the screen
     ScreenScaffold(
@@ -431,7 +434,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
                     },
                     secondaryLabel = {
                         Text(
-                            text = "R$ ${item.perDayValue}",
+                            text = "${ChronoUnit.DAYS.between(LocalDate.parse(item.boughtDate), LocalDate.now())} days | ${formatter.format(item.perDayValue)}",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
