@@ -374,8 +374,7 @@ fun CreateScreen(id: String?, viewModel: ItemViewModel, navController: NavContro
 }
 
 fun calculatePerDayValue(date: LocalDate, productValue: Float): Float {
-    val daysSinceBought = ChronoUnit.DAYS.between(date, LocalDate.now())
-    Log.d("calculatePerDayValue", "since bought: $daysSinceBought")
+    val daysSinceBought = ChronoUnit.DAYS.between(date, LocalDate.now()) + 1
 
     val valuePerDay = productValue / daysSinceBought
 
@@ -434,7 +433,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
                     },
                     secondaryLabel = {
                         Text(
-                            text = "${ChronoUnit.DAYS.between(LocalDate.parse(item.boughtDate), LocalDate.now())} days | ${formatter.format(item.perDayValue)}",
+                            text = "${ChronoUnit.DAYS.between(LocalDate.parse(item.boughtDate), LocalDate.now()) + 1} days | ${formatter.format(item.perDayValue)}",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
