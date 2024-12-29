@@ -1,3 +1,5 @@
+package com.example.worthitometer.datastore
+
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException

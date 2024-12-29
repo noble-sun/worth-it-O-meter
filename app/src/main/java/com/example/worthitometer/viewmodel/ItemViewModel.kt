@@ -1,17 +1,20 @@
 package com.example.worthitometer.viewmodel
 
-import ItemRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.worthitometer.datastore.ItemRepository
 import com.worthItOMeter.Item
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class ItemViewModel(private val repository: ItemRepository) : ViewModel() {
+@HiltViewModel
+class ItemViewModel @Inject constructor(private val repository: ItemRepository) : ViewModel() {
 
     val items: StateFlow<List<Item>> = repository.itemsFlow
         .map{ it.itemsList}

@@ -5,11 +5,11 @@
 
 package com.example.worthitometer.presentation
 
-import ItemRepository
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +43,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
@@ -91,7 +93,8 @@ import com.google.android.horologist.compose.material.Chip
 import com.google.android.horologist.compose.material.ListHeaderDefaults.firstItemPadding
 import com.google.android.horologist.compose.material.ResponsiveListHeader
 import com.worthItOMeter.Item
-import itemListDataStore
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -100,7 +103,9 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val viewModel: ItemViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
@@ -109,10 +114,13 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            if (shouldUpdateItems) {
-                UpdatePerDayValue()
+            LaunchedEffect(shouldUpdateItems) {
+                if (shouldUpdateItems) {
+                    updatePerDayValue(viewModel)
+                }
             }
-            WearApp("Android")
+
+            WearApp(viewModel)
         }
     }
 
@@ -122,16 +130,15 @@ class MainActivity : ComponentActivity() {
 
         shouldUpdateItems = true
     }
+
+    override fun onPause() {
+        super.onPause()
+
+        shouldUpdateItems = false
+    }
 }
 
-@Composable
-fun UpdatePerDayValue() {
-    val context = LocalContext.current
-    val repository = ItemRepository(context.itemListDataStore)
-    val viewModel = ItemViewModel(repository)
-
-    val items = viewModel.items.collectAsState()
-
+fun updatePerDayValue(viewModel: ItemViewModel) {
     viewModel.updateItems {item, index ->
         item.toBuilder()
             .setPerDayValue(calculatePerDayValue(
@@ -144,15 +151,11 @@ fun UpdatePerDayValue() {
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun WearApp(greetingName: String) {
+fun WearApp(viewModel: ItemViewModel) {
     WorthItOMeterTheme {
         // This adds a structured layer to arrange screen with top level components like time,
         // scroll positions and page indicator.
         AppScaffold{
-            val context = LocalContext.current
-            val repository = ItemRepository(context.itemListDataStore)
-            val viewModel = ItemViewModel(repository)
-
             val navController = rememberSwipeDismissableNavController()
             SwipeDismissableNavHost(
                 navController = navController,
@@ -458,5 +461,5 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android")
+
 }

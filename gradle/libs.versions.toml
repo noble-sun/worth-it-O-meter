@@ -43,8 +43,11 @@ horologist-composables = "com.google.android.horologist:horologist-composables:0
 watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
 material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 datastore = "androidx.datastore:datastore:1.0.0"
-protobuf = "com.google.protobuf:protobuf-javalite:3.21.7"
+protobuf = "com.google.protobuf:protobuf-javalite:3.24.1"
 material-icons-extended = "androidx.compose.material:material-icons-extended:1.7.6"
+hilt-android = "com.google.dagger:hilt-android:2.51.1"
+hilt-android-compiler = "com.google.dagger:hilt-android-compiler:2.51.1"
+hilt-navigation-compose = "androidx.hilt:hilt-navigation-compose:1.0.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

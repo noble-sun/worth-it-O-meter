@@ -4,7 +4,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.protobuf") version "0.9.1"
+    id("com.google.protobuf") version "0.9.4"
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -30,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -66,6 +68,9 @@ dependencies {
     implementation(libs.material.icons.extended)
     implementation(libs.datastore)
     implementation(libs.protobuf)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    kapt(libs.hilt.android.compiler)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
@@ -73,9 +78,13 @@ dependencies {
     debugImplementation(libs.tiles.tooling)
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 protobuf {
     protoc {
-        artifact =  "com.google.protobuf:protoc:3.21.7"
+        artifact =  "com.google.protobuf:protoc:3.24.1"
     }
     generateProtoTasks {
         all().forEach { task ->

@@ -1,19 +1,30 @@
+package com.example.worthitometer.datastore
+
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.worthItOMeter.Item
 import com.worthItOMeter.ItemList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.IOException
+import javax.inject.Inject
 
 val Context.itemListDataStore: DataStore<ItemList> by dataStore(
     fileName = "item_list.pb",
     serializer = ItemListSerializer
 )
 
-class ItemRepository(private val dataStore: DataStore<ItemList>) {
-
-    val itemsFlow = dataStore.data
+class ItemRepository @Inject constructor(private val dataStore: DataStore<ItemList>) {
+    val itemsFlow: Flow<ItemList> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(ItemList.getDefaultInstance())
+            } else {
+                throw exception
+            }
+        }
 
     suspend fun updateAllItems(transform: (Item, Int) -> Item) {
         dataStore.updateData { currentList ->
