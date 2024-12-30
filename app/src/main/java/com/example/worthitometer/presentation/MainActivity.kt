@@ -99,6 +99,7 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -436,7 +437,7 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
                     },
                     secondaryLabel = {
                         Text(
-                            text = "${ChronoUnit.DAYS.between(LocalDate.parse(item.boughtDate), LocalDate.now()) + 1} days | ${formatter.format(item.perDayValue)}",
+                            text = "${formatDaysSinceBought(item.boughtDate)} | ${formatter.format(item.perDayValue)}",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -458,6 +459,13 @@ fun ListScreen(viewModel: ItemViewModel, navController: NavController) {
         }
     }
 }
+
+fun formatDaysSinceBought(boughtDate: String): String {
+   val period = Period.between(LocalDate.parse(boughtDate), LocalDate.now())
+
+    return "${period.years}y ${period.months}m ${if (period.days == 0) 1 else period.days }d"
+}
+
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
